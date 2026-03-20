@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 출석 관리 시스템</title>
+    <!-- Google Fonts (Pretendard) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        :root {
+            --primary-blue: #0066ff;
+            --secondary-blue: #eef4ff;
+            --success-green: #2ecc71;
+            --danger-red: #e74c3c;
+            --warning-orange: #f39c12;
+            --text-dark: #2c3e50;
+            --bg-light: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        /* 입력 폼 섹션 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-blue);
+        }
+
+        /* 상태 선택 버튼 */
+        .status-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        /* 파란색 버튼 강조 */
+        .btn-present { background-color: var(--primary-blue); }
+        .btn-absent { background-color: var(--danger-red); }
+        .btn-tardy { background-color: var(--warning-orange); }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 기록 리스트 섹션 */
+        .record-section {
+            margin-top: 40px;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary-blue);
+        }
+
+        .record-list {
+            list-style: none;
+        }
+
+        .record-item {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-info .name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .student-info .time {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge-present { background-color: var(--primary-blue); }
+        .badge-absent { background-color: var(--danger-red); }
+        .badge-tardy { background-color: var(--warning-orange); }
+
+        /* 반응형 디자인 */
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            .status-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>학생 출석 관리 시스템</h1>
+
+    <div class="input-group">
+        <label for="studentName">학생 이름</label>
+        <input type="text" id="studentName" placeholder="이름을 입력하세요" autocomplete="off">
+    </div>
+
+    <div class="status-buttons">
+        <button class="btn btn-present" onclick="recordAttendance('출석')">출석 (Present)</button>
+        <button class="btn btn-tardy" onclick="recordAttendance('지각')">지각 (Tardy)</button>
+        <button class="btn btn-absent" onclick="recordAttendance('결석')">결석 (Absent)</button>
+    </div>
+
+    <div class="record-section">
+        <div class="record-header">
+            <h3>최근 출석 기록</h3>
+            <small id="countText">기록: 0건</small>
+        </div>
+        <ul class="record-list" id="attendanceList">
+            <!-- 데이터가 여기에 실시간으로 표시됩니다 -->
+        </ul>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // TODO: 아래 설정을 본인의 Firebase 프로젝트 설정으로 교체하세요.
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const attendanceCol = collection(db, "attendance");
+
+    // 출석 기록 저장 함수
+    window.recordAttendance = async (status) => {
+        const nameInput = document.getElementById('studentName');
+        const name = nameInput.value.trim();
+
+        if (!name) {
+            alert("학생 이름을 입력해주세요.");
+            return;
+        }
+
+        try {
+            await addDoc(attendanceCol, {
+                name: name,
+                status: status,
+                timestamp: serverTimestamp()
+            });
+            nameInput.value = ""; // 입력창 초기화
+        } catch (e) {
+            console.error("에러 발생: ", e);
+            alert("데이터 저장 중 오류가 발생했습니다.");
+        }
+    };
+
+    // 실시간 데이터 감시 및 화면 표시
+    const q = query(attendanceCol, orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+        const listElement = document.getElementById('attendanceList');
+        const countText = document.getElementById('countText');
+        listElement.innerHTML = "";
+        
+        countText.innerText = `기록: ${snapshot.size}건`;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : "처리 중...";
+            
+            let badgeClass = "badge-present";
+            if(data.status === "결석") badgeClass = "badge-absent";
+            if(data.status === "지각") badgeClass = "badge-tardy";
+
+            const li = document.createElement('li');
+            li.className = 'record-item';
+            li.innerHTML = `
+                <div class="student-info">
+                    <span class="name">${data.name}</span>
+                    <span class="time">${time}</span>
+                </div>
+                <span class="badge ${badgeClass}">${data.status}</span>
+            `;
+            listElement.appendChild(li);
+        });
+    });
+</script>
+
+</body>
+</html>
